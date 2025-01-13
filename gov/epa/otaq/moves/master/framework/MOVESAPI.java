@@ -304,6 +304,7 @@ public class MOVESAPI implements MOVESEngineListener, MOVESEngine.CompletedListe
 	**/
 	public void runApplication(String commandLineArgs[]) {
 		try {
+            PowerManagement.INSTANCE.preventSleep();
 			setupFlagForMaster();
 
 			boolean isError = false;
@@ -327,6 +328,7 @@ public class MOVESAPI implements MOVESEngineListener, MOVESEngine.CompletedListe
 			}
 		} finally {
 			shutdownFlagForMaster();
+            PowerManagement.INSTANCE.allowSleep();
 		}
 	}
 

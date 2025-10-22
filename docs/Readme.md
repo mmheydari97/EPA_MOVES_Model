@@ -5,7 +5,7 @@ This readme contains a table of contents of MOVES help files, notes, and code do
 * [Installation Troubleshooting](InstallationTroubleshooting.pdf): Answers for frequently asked questions regarding installation issues when using the .exe installer
 * [Quick Start Guide To Accessing MariaDB Data](QuickStartGuideToAccessingMariaDBData.pdf): Tips for users who are transitioning from MySQL and MySQL Workbench to MariaDB and HeidiSQL
 * [Command Line MOVES](CommandLineMOVES.md): A brief guide on how to run MOVES from the command line
-* [Tips for Faster MOVES Runs](TipsForFasterMOVESRuns.md): Suggestions for how to structure MOVES runs to be as efficient as possible
+* [Tips for Faster MOVES Runs](TipsForFasterMOVESRuns.pdf): Suggestions for how to structure MOVES runs to be as efficient as possible
 * [Apportioning EV Output](ApportioningEVOutput.md): Explains how to apportion MOVES EV energy consumption, activity, and emissions between battery and fuel cell electric vehicles
 
 ## MOVES Cheat Sheets:
@@ -19,7 +19,7 @@ These PDF cheat sheets summarize common tables and values used to create MOVES r
 ## Help for MOVES Tools:
 
 * [Converting MOVES4 input databases to MOVES5](../database/ConversionScripts/InputDatabaseConversionHelp.pdf): Information on steps needed to convert MOVES4 input databases to the MOVES5 format (as well as converting MOVES3 input databases to MOVES5)
-* [AVFT Tool](../database/AVFTTool/AVFTToolHelp.pdf): Instructions on how to use the AVFT Tool for building the AVFT input table
+* [AVFT Tool](../gov/epa/otaq/moves/master/gui/avfttool/AVFTToolHelp.pdf): Instructions on how to use the AVFT Tool for building the AVFT input table
 * [Building LEV and NLEV input databases](../database/LEV_NLEVScripts/InstructionsForLEV_NLEV_Tool.pdf): Instructions on how to use the LEV/NLEV Tool in the MOVES GUI
 * [National Emissions Inventory Submissions QA Tool](NEIQAInstructions.md): Instructions and documentation for the NEI Submissions QA Tool
 * [ONI Tool](../database/ONITool/InstructionsForONITool.pdf): Instructions on how to use the ONI Tool when running MOVES in rates mode with default off-network idling activity

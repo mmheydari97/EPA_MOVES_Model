@@ -1,5 +1,4 @@
 -- MOVES NEI QA Script for Nonroad CDBs
--- Last Updated: 8-24-2023 for MOVES4.0.0
 -- ##############################################################################
 -- Usage Notes:  This script is intended to be run via the ANT command 
 --               "nonroadNEIQA". See database\NEIQA\NEIQAHelp.pdf for more info.

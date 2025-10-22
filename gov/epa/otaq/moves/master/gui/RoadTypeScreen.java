@@ -59,7 +59,7 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 	/** Add Road Type button. **/
 	JButton addRoadType;
 	/** global variable used to disable delete off-road when Extended Idle Exhaust is selected **/
-	boolean hasExtendedIdleExhaust;
+	boolean hasHotellingExhaust;
 	/** global variable used to disable delete off-road when Start Exhaust is selected **/
 	boolean hasStartExhaust;
 	/** global variable used to disable delete all roads when Refueling processes are selected **/
@@ -78,6 +78,11 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 	MOVESWindow movesRootWindow = null;
 	/** Label warning of deprecated ramp option. **/
 	JLabel hasDeprecatedShouldSeparateRampsTrueLabel;
+	JLabel requiresAllRoadTypesLabel;
+	JLabel requiresOffNetworkRoadTypeNotProjectLabel;
+	JLabel requiresAllOnNetworkRoadTypesLabel;
+	JLabel requiresOffNetworkRoadTypeProjectLabel;
+	JLabel requiresOnNetworkRoadTypeLabel;
 
 	/**
 	 * Constructs a OnRoadVehicleEquipment panel, also creates
@@ -208,6 +213,22 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 				+ "Update by saving to a new file and opening it.</body></html>",
 				warningImage, JLabel.LEFT);
 		hasDeprecatedShouldSeparateRampsTrueLabel.setName("hasDeprecatedShouldSeparateRampsTrueLabel");
+
+		requiresAllRoadTypesLabel = new JLabel("<html><body>All Road Types are required for running, evaporative, and<br>refueling emission processes.</body></html>",
+				warningImage, JLabel.LEFT);
+		requiresAllRoadTypesLabel.setName("requiresAllRoadTypesLabel");
+		requiresOffNetworkRoadTypeNotProjectLabel = new JLabel("<html><body>The Off-Network Road Type is required for all emission<br>processes.</body></html>",
+				warningImage, JLabel.LEFT);
+		requiresOffNetworkRoadTypeNotProjectLabel.setName("requiresOffNetworkRoadTypeNotProjectLabel");
+		requiresAllOnNetworkRoadTypesLabel = new JLabel("<html><body>All On-Network Road Types are required for tirewear<br>and brakewear emission processes.</body></html>",
+				warningImage, JLabel.LEFT);
+		requiresAllOnNetworkRoadTypesLabel.setName("requiresAllOnNetworkRoadTypesLabel");
+		requiresOffNetworkRoadTypeProjectLabel = new JLabel("<html><body>The Off-Network Road Type is required for starts and<br>hotelling emission processes.</body></html>",
+				warningImage, JLabel.LEFT);
+		requiresOffNetworkRoadTypeProjectLabel.setName("requiresOffNetworkRoadTypeProjectLabel");
+		requiresOnNetworkRoadTypeLabel = new JLabel("<html><body>An On-Network Road Type is required for running,<br>tirewear, and brakewear emission processes.</body></html>",
+				warningImage, JLabel.LEFT);
+		requiresOnNetworkRoadTypeLabel.setName("requiresOnNetworkRoadTypeLabel");
 	}
 
 	/** Sets the layout of the controls. **/
@@ -216,7 +237,7 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.insets = new Insets(2,2,2,2);
 		gbc.gridwidth = 2;
-		gbc.gridheight = 5;
+		gbc.gridheight = 10;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		setLayout(new GridBagLayout());
@@ -240,6 +261,16 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 
 		LayoutUtility.setPositionOnGrid(gbc,0, 3, "WEST", 2, 2);
 		add(hasDeprecatedShouldSeparateRampsTrueLabel, gbc);
+		LayoutUtility.setPositionOnGrid(gbc,0, 4, "WEST", 2, 2);
+		add(requiresAllRoadTypesLabel, gbc);
+		LayoutUtility.setPositionOnGrid(gbc,0, 5, "WEST", 2, 2);
+		add(requiresOffNetworkRoadTypeNotProjectLabel, gbc);
+		LayoutUtility.setPositionOnGrid(gbc,0, 6, "WEST", 2, 2);
+		add(requiresAllOnNetworkRoadTypesLabel, gbc);
+		LayoutUtility.setPositionOnGrid(gbc,0, 7, "WEST", 2, 2);
+		add(requiresOffNetworkRoadTypeProjectLabel, gbc);
+		LayoutUtility.setPositionOnGrid(gbc,0, 8, "WEST", 2, 2);
+		add(requiresOnNetworkRoadTypeLabel, gbc);
 	}
 
 	/**
@@ -279,20 +310,17 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 			selectionDelete.setEnabled(false);
 		} else if(selectionList.getSelectedIndices().length >= 1) {
 			selectionDelete.setEnabled(true);
+
+			// all road types are required for running, evap, and refueling losses at all scales except project
+			if((hasRunningExhaust || hasEvap || hasRefuelingLoss) && domain != ModelDomain.PROJECT){
+				selectionDelete.setEnabled(false);
+			}
+
+			// can't delete off-network road type if we've got off-network processes 
 			Object[] selectedItems = selectionList.getSelectedValuesList().toArray();
 			for(int i=0;i<selectedItems.length;i++) {
 				RoadType r = (RoadType)selectedItems[i];
-                // can't delete off-network road type if we've got off-network processes
-				if((r.roadTypeID == 1) &&
-						(hasExtendedIdleExhaust || hasStartExhaust || hasEvap || hasRefuelingLoss || hasOffRoadSelections)) {
-                    selectionDelete.setEnabled(false);
-				}
-                // can't delete off-network road type if we've got running due to ONI as long as we're not at project scale
-				if(r.roadTypeID == 1 && hasRunningExhaust && domain != ModelDomain.PROJECT){
-                    selectionDelete.setEnabled(false);
-                }
-                // can't delete any on-network road type if we've got running or refueling due to ONI (not applicable at project scale)
-				if((r.roadTypeID >= 2 && r.roadTypeID <= 5) && (hasRefuelingLoss || hasRunningExhaust) && (domain != ModelDomain.PROJECT)) {
+				if((r.roadTypeID == 1) && (hasStartExhaust || hasHotellingExhaust)) {
                     selectionDelete.setEnabled(false);
 				}
 			}
@@ -330,7 +358,7 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 		Object[] selectedItems = selectionList.getSelectedValuesList().toArray();
 		for(int i=0;i<selectedItems.length;i++) {
 			if(!((((RoadType)selectedItems[i]).roadTypeID == 1) &&
-					(hasExtendedIdleExhaust || hasStartExhaust))) {
+					(hasHotellingExhaust || hasStartExhaust))) {
 				selectionListModel.removeElement(selectedItems[i]);
 			}
 		}
@@ -432,7 +460,7 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 	public void loadFromRunSpec(RunSpec runspec) {
 		loadRoadTypes();
         hasRunningExhaust = false;
-		hasExtendedIdleExhaust = false;
+		hasHotellingExhaust = false;
 		hasStartExhaust = false;
 		hasRefuelingLoss = false;
 		hasEvap = false;
@@ -443,17 +471,8 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
                 case 1: // 1 == Running Exhaust
                     hasRunningExhaust = true;
                     break;
-				case 90: // 90== Extended Idle Exhaust
-					hasExtendedIdleExhaust = true;
-					break;
 				case 2: // 2== Start Exhaust
 					hasStartExhaust = true;
-					break;
-				case 18: // 18 == Refueling Displacement Vapor Loss
-					hasRefuelingLoss = true;
-					break;
-				case 19: // 19 == Refueling Spillage Loss
-					hasRefuelingLoss = true;
 					break;
 				case 11: // 11 == Evap Permeation
                     hasEvap = true;
@@ -464,6 +483,18 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 				case 13: // 13 == Evap Fuel Leaks
                     hasEvap = true;
                     break;
+				case 90: // 90 == Extended Idle Exhaust
+					hasHotellingExhaust = true;
+					break;
+				case 91: // 91 == Other Hotelling Exhaust
+					hasHotellingExhaust = true;
+					break;
+				case 18: // 18 == Refueling Displacement Vapor Loss
+					hasRefuelingLoss = true;
+					break;
+				case 19: // 19 == Refueling Spillage Loss
+					hasRefuelingLoss = true;
+					break;
 			}
 		}
 
@@ -533,83 +564,179 @@ public class RoadTypeScreen extends JPanel implements ListSelectionListener,
 	public RunSpecSectionStatus calculateRunSpecSectionStatus(RunSpec runspec,
 			TreeMap<String,RunSpecSectionStatus> sections) {
 		RunSpecSectionStatus status;
+		ModelDomain domain = null;
+        try {
+            domain = MOVESNavigation.singleton.parent.runSpec.domain;
+        } catch (Exception e) {
+            domain = ModelDomain.SINGLE_COUNTY; // assume county scale if there's a problem detecting what scale we're at
+        }
+		requiresAllRoadTypesLabel.setVisible(false);
+		requiresOffNetworkRoadTypeNotProjectLabel.setVisible(false);
+		requiresAllOnNetworkRoadTypesLabel.setVisible(false);
+		requiresOffNetworkRoadTypeProjectLabel.setVisible(false);
+		requiresOnNetworkRoadTypeLabel.setVisible(false);
+
 		if(runspec.hasDeprecatedShouldSeparateRampsTrue) {
 			status = new RunSpecSectionStatus(RunSpecSectionStatus.NOT_READY);
-		} else if(runspec.roadTypes.isEmpty()) {
-			status = new RunSpecSectionStatus(RunSpecSectionStatus.NOT_READY);
-		} else if(!runspec.models.contains(Model.NONROAD)) {
+		} else if(!runspec.models.contains(Model.NONROAD) && domain != ModelDomain.PROJECT) { // onroad & default or county scales
 			// Look for required road types
-			boolean usesRefuelingLoss = false;
-			boolean usesMesoscaleEvap = false;
-			boolean needsNonOffnetworkRoad = false;
-			boolean calculatesONI = false;
-			for(Iterator i=runspec.pollutantProcessAssociations.iterator();i.hasNext();) {
-				PollutantProcessAssociation p = (PollutantProcessAssociation)i.next();
+			boolean requiresAllRoadTypes = false;
+			boolean requiresOffNetworkRoadType = false;
+			boolean requiresAllOnNetworkRoadTypes = false;
+			for(Iterator<PollutantProcessAssociation> i=runspec.pollutantProcessAssociations.iterator(); i.hasNext(); ) {
+				PollutantProcessAssociation p = i.next();
 				switch(p.emissionProcess.databaseKey) {
 					case 1: // 1 == Running Exhaust
-						needsNonOffnetworkRoad = true;
-						// ONI (Off network idling) needs all road types when off-network
-						// is selected with any Running Exhaust process
-						// However, Project Scale does not calculate ONI
-						for(RoadType r : runspec.roadTypes) {
-							if(r.roadTypeID == 1 && runspec.domain != ModelDomain.PROJECT) {
-								calculatesONI = true;
-								break;
-							}
-						}
+						requiresAllRoadTypes = true;
+						break;
+					case 2: // 2 == Start Exhaust
+						requiresOffNetworkRoadType = true;
 						break;
 					case 9: // 9 == Brakewear
-						needsNonOffnetworkRoad = true;
+						requiresAllOnNetworkRoadTypes = true;
 						break;
 					case 10: // 10 == Tirewear
-						needsNonOffnetworkRoad = true;
+						requiresAllOnNetworkRoadTypes = true;
 						break;
 					case 11: // 11 == Evap Permeation
-						if(runspec.scale == ModelScale.MESOSCALE_LOOKUP) {
-							usesMesoscaleEvap = true;
-						}
+						requiresAllRoadTypes = true;
 						break;
 					case 12: // 12 == Evap Fuel Vapor Venting
-						if(runspec.scale == ModelScale.MESOSCALE_LOOKUP) {
-							usesMesoscaleEvap = true;
-						}
+						requiresAllRoadTypes = true;
 						break;
 					case 13: // 13 == Evap Fuel Leaks
-						if(runspec.scale == ModelScale.MESOSCALE_LOOKUP) {
-							usesMesoscaleEvap = true;
-						}
+						requiresAllRoadTypes = true;
+						break;
+					case 15: // 15 == Crankcase Running Exhaust
+						requiresAllRoadTypes = true;
+						break;
+					case 16: // 16 == Crankcase Start Exhaust
+						requiresOffNetworkRoadType = true;
+						break;
+					case 17: // 17 == Crankcase Extended Idle Exhaust
+						requiresOffNetworkRoadType = true;
 						break;
 					case 18: // 18 == Refueling Displacement Vapor Loss
-						usesRefuelingLoss = true;
+						requiresAllRoadTypes = true;
 						break;
 					case 19: // 19 == Refueling Spillage Loss
-						usesRefuelingLoss = true;
+						requiresAllRoadTypes = true;
+						break;
+					case 90: // 90 == Extended Idle Exhaust
+						requiresOffNetworkRoadType = true;
+						break;
+					case 91: // 91 == In the runspec, this represents "Other Hotelling Exhaust" (APU & Shorepower)
+						requiresOffNetworkRoadType = true;
 						break;
 				}
 			}
+			// make sure all booleans are statisfied
 			boolean isOK = true;
-			// if calculating ONI or refueling losses, all road types are required
-			if(isOK && (usesRefuelingLoss || calculatesONI)) {
-				boolean hasRequiredRoads = false;
-				if(runspec.roadTypes.size() < roadTypeListModel.getSize()) {
-					hasRequiredRoads = hasRefuelingRoads(runspec);
-				} else {
-					hasRequiredRoads = true;
+			if(isOK && requiresAllRoadTypes) {
+				Set<Integer> missingRoadTypeIDs = new HashSet<>(Arrays.asList(1, 2, 3, 4, 5));
+				for(RoadType r : runspec.roadTypes) {
+					missingRoadTypeIDs.remove(r.roadTypeID);
 				}
-
-				isOK = isOK && hasRequiredRoads;
+				isOK = isOK && missingRoadTypeIDs.isEmpty();
+				if (!isOK) {
+					requiresAllRoadTypesLabel.setVisible(true);
+				}
 			}
-			if(isOK && needsNonOffnetworkRoad) {
+			if(isOK && requiresOffNetworkRoadType) {
+				Set<Integer> missingRoadTypeIDs = new HashSet<>(Arrays.asList(1));
+				for(RoadType r : runspec.roadTypes) {
+					missingRoadTypeIDs.remove(r.roadTypeID);
+				}
+				isOK = isOK && missingRoadTypeIDs.isEmpty();
+				if (!isOK) {
+					requiresOffNetworkRoadTypeNotProjectLabel.setVisible(true);
+				}
+			}
+			if(isOK && requiresAllOnNetworkRoadTypes) {
+				Set<Integer> missingRoadTypeIDs = new HashSet<>(Arrays.asList(2, 3, 4, 5));
+				for(RoadType r : runspec.roadTypes) {
+					missingRoadTypeIDs.remove(r.roadTypeID);
+				}
+				isOK = isOK && missingRoadTypeIDs.isEmpty();
+				if (!isOK) {
+					requiresAllOnNetworkRoadTypesLabel.setVisible(true);
+				}
+			}
+			status = new RunSpecSectionStatus(isOK? RunSpecSectionStatus.OK : RunSpecSectionStatus.NOT_READY);
+		} else if (!runspec.models.contains(Model.NONROAD) && domain == ModelDomain.PROJECT) { // project scale
+			// Look for required road types
+			boolean requiresOnNetworkRoadType = false;
+			boolean requiresOffNetworkRoadType = false;
+			for(Iterator<PollutantProcessAssociation> i=runspec.pollutantProcessAssociations.iterator(); i.hasNext(); ) {
+				PollutantProcessAssociation p = i.next();
+				switch(p.emissionProcess.databaseKey) {
+					case 1: // 1 == Running Exhaust
+						requiresOnNetworkRoadType = true;
+						break;
+					case 2: // 2 == Start Exhaust
+						requiresOffNetworkRoadType = true;
+						break;
+					case 9: // 9 == Brakewear
+						requiresOnNetworkRoadType = true;
+						break;
+					case 10: // 10 == Tirewear
+						requiresOnNetworkRoadType = true;
+						break;
+					case 11: // 11 == Evap Permeation requires any road type, which does not need to be rechecked here
+						break;
+					case 12: // 12 == Evap Fuel Vapor Venting requires any road type, which does not need to be rechecked here
+						break;
+					case 13: // 13 == Evap Fuel Leaks requires any road type, which does not need to be rechecked here
+						break;
+					case 15: // 15 == Crankcase Running Exhaust
+						requiresOnNetworkRoadType = true;
+						break;
+					case 16: // 16 == Crankcase Start Exhaust
+						requiresOffNetworkRoadType = true;
+						break;
+					case 17: // 17 == Crankcase Extended Idle Exhaust
+						requiresOffNetworkRoadType = true;
+						break;
+					case 18: // 18 == Refueling Displacement Vapor Loss requires any road type, which does not need to be rechecked here
+						break;
+					case 19: // 19 == Refueling Spillage Loss requires any road type, which does not need to be rechecked here
+						break;
+					case 90: // 90 == Extended Idle Exhaust
+						requiresOffNetworkRoadType = true;
+						break;
+					case 91: // 91 == In the runspec, this represents "Other Hotelling Exhaust" (APU & Shorepower)
+						requiresOffNetworkRoadType = true;
+						break;
+				}
+			}
+			// make sure all booleans are statisfied
+			boolean isOK = true;
+			if(isOK && requiresOnNetworkRoadType) {
 				boolean found = false;
 				for(RoadType r : runspec.roadTypes) {
-					if(r.roadTypeID >= 2 && r.roadTypeID <= 9) {
+					if (r.roadTypeID >= 2 && r.roadTypeID <= 5) {
 						found = true;
 						break;
 					}
 				}
 				isOK = isOK && found;
+				if (!isOK) {
+					requiresOnNetworkRoadTypeLabel.setVisible(true);
+				}
+			}
+			if(isOK && requiresOffNetworkRoadType) {
+				Set<Integer> missingRoadTypeIDs = new HashSet<>(Arrays.asList(1));
+				for(RoadType r : runspec.roadTypes) {
+					missingRoadTypeIDs.remove(r.roadTypeID);
+				}
+				isOK = isOK && missingRoadTypeIDs.isEmpty();
+				if (!isOK) {
+					requiresOffNetworkRoadTypeProjectLabel.setVisible(true);
+				}
 			}
 			status = new RunSpecSectionStatus(isOK? RunSpecSectionStatus.OK : RunSpecSectionStatus.NOT_READY);
+		} else if(runspec.roadTypes.isEmpty()) {
+			status = new RunSpecSectionStatus(RunSpecSectionStatus.NOT_READY);
 		} else {
 			status = new RunSpecSectionStatus(RunSpecSectionStatus.OK);
 		}

@@ -1425,10 +1425,10 @@ public class PollutantsAndProcesses extends JPanel implements RunSpecEditor, Cel
 	**/
 	public void saveToRunSpec(RunSpec runspec) {
 		//System.out.println("PollutantAndProcesses.saveToRunSpec");
+		// used for automatically selecting the correct road types
 		boolean shouldAddOffNetworkRoadType = false;
-		boolean hasRefuelingLoss = false;
-		boolean hasMesoscaleEvap = false;
-        boolean hasRunning = false;
+		boolean shouldAddAllRoadTypes = false;
+
 		runspec.pollutantProcessAssociations.clear();
 
 		Models.ModelCombination mc = runspec.getModelCombination();
@@ -1473,22 +1473,18 @@ public class PollutantsAndProcesses extends JPanel implements RunSpecEditor, Cel
 						}
 						runspec.pollutantProcessAssociations.add(assoc);
 						//System.out.println("Selected: " + assoc.toString());
-						// Ensure that processes that *must* have the off-network road
-						// type available will have it
-						if(process.databaseKey == 2 || process.databaseKey == 90) {
-							// 90== Extended Idle Exhaust by definition
-							// 2== Start Exhaust by definition
+						
+						if(process.databaseKey == 1 || process.databaseKey == 15) { // running
+							shouldAddAllRoadTypes = true; 
+						} else if(process.databaseKey == 11 || process.databaseKey == 12 || process.databaseKey == 13) { // evap
+							shouldAddAllRoadTypes = true;
+						} else if(process.databaseKey == 18 || process.databaseKey == 19) { // refueling
+							shouldAddAllRoadTypes = true;
+						} else if(process.databaseKey == 2 || process.databaseKey == 16) { // starts
 							shouldAddOffNetworkRoadType = true;
-						} else if(process.databaseKey == 18 || process.databaseKey == 19) {
-							hasRefuelingLoss = true;
-						} else if((process.databaseKey == 11 || process.databaseKey == 12 || process.databaseKey == 13) &&
-                                  (runspec.scale == ModelScale.MESOSCALE_LOOKUP)) {
-                            hasMesoscaleEvap = true;
-                        } else if(process.databaseKey == 12) {
-                            shouldAddOffNetworkRoadType = true;
-                        } else if(process.databaseKey == 1) {
-                            hasRunning = true;
-                        } 
+						} else if(process.databaseKey == 17 || process.databaseKey == 90 || process.databaseKey == 91) { // hotelling
+							shouldAddOffNetworkRoadType = true;
+						}
 					}
 				}
 			}
@@ -1521,17 +1517,17 @@ public class PollutantsAndProcesses extends JPanel implements RunSpecEditor, Cel
 			// System.out.println("Selected(#2): " + assoc.toString());
 		}
 
-
+		// if a process requires the off-network road type, make sure it's included in the runspec
 		if(shouldAddOffNetworkRoadType) {
 			RoadType rt = new RoadType(1,"Off-Network", Models.ModelCombination.M1);
 			runspec.roadTypes.add(rt);
 		}
 
-		if(hasRefuelingLoss || hasRunning) { // || hasMesoscaleEvap) {
-            // if not project scale, we need all road types due to ONI
-            if (runspec.domain != ModelDomain.PROJECT) {
-                RoadTypeScreen.setAllRoadTypes(runspec);
-            } else {
+		// if a process requires all road types, make sure it's included in the runspec as long as we're not at project scale
+		if(shouldAddAllRoadTypes) {
+			if(runspec.domain != ModelDomain.PROJECT) {
+				RoadTypeScreen.setAllRoadTypes(runspec);
+			} else {
                 // at project scale, make sure at least one on-network road type is selected. if none are selected, select all by default
                 boolean hasOnNetworkRoadType = false;
                 Iterator<RoadType> runspecRoadTypes = runspec.roadTypes.iterator();
@@ -1545,7 +1541,6 @@ public class PollutantsAndProcesses extends JPanel implements RunSpecEditor, Cel
                 if (!hasOnNetworkRoadType) {
                     RoadTypeScreen.setAllRoadTypes(runspec);
                 }
-
             }
 		}
 	}

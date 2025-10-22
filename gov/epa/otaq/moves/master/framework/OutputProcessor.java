@@ -1093,7 +1093,7 @@ public class OutputProcessor {
 					Logger.log(LogMessageCategory.INFO,"Removing data from MOVESOutput per Advanced Performance Features setting...");
 					sql = "delete from MOVESOutput where MOVESRunID=" + MOVESEngine.theInstance.getActiveRunID();
 					SQLRunner.executeSQL(outputDatabase, sql);
-					// Truncate if there is no more data in order to save time when transfering output databases.
+					// Truncate if there is no more data in order to save time when transferring output databases.
 					sql = "select count(*) from MOVESOutput";
 					if(SQLRunner.executeScalar(outputDatabase, sql) <= 0) {
 						Logger.log(LogMessageCategory.INFO,"Truncating empty MOVESOutput per Advanced Performance Features setting.");
@@ -1106,7 +1106,7 @@ public class OutputProcessor {
 					Logger.log(LogMessageCategory.INFO,"Removing data from MOVESActivityOutput per Advanced Performance Features setting...");
 					sql = "delete from MOVESActivityOutput where MOVESRunID=" + MOVESEngine.theInstance.getActiveRunID();
 					SQLRunner.executeSQL(outputDatabase, sql);
-					// Truncate if there is no more data in order to save time when transfering output databases.
+					// Truncate if there is no more data in order to save time when transferring output databases.
 					sql = "select count(*) from MOVESActivityOutput";
 					if(SQLRunner.executeScalar(outputDatabase, sql) <= 0) {
 						Logger.log(LogMessageCategory.INFO,"Truncating empty MOVESActivityOutput per Advanced Performance Features setting.");
@@ -1119,7 +1119,7 @@ public class OutputProcessor {
 					Logger.log(LogMessageCategory.INFO,"Removing data from BaseRateOutput per Advanced Performance Features setting...");
 					sql = "delete from BaseRateOutput where MOVESRunID=" + MOVESEngine.theInstance.getActiveRunID();
 					SQLRunner.executeSQL(outputDatabase, sql);
-					// Truncate if there is no more data in order to save time when transfering output databases.
+					// Truncate if there is no more data in order to save time when transferring output databases.
 					sql = "select count(*) from BaseRateOutput";
 					if(SQLRunner.executeScalar(outputDatabase, sql) <= 0) {
 						Logger.log(LogMessageCategory.INFO,"Truncating empty BaseRateOutput per Advanced Performance Features setting.");
@@ -1131,7 +1131,7 @@ public class OutputProcessor {
 					Logger.log(LogMessageCategory.INFO,"Removing data from BaseRateUnits per Advanced Performance Features setting...");
 					sql = "delete from BaseRateUnits where MOVESRunID=" + MOVESEngine.theInstance.getActiveRunID();
 					SQLRunner.executeSQL(outputDatabase, sql);
-					// Truncate if there is no more data in order to save time when transfering output databases.
+					// Truncate if there is no more data in order to save time when transferring output databases.
 					sql = "select count(*) from BaseRateUnits";
 					if(SQLRunner.executeScalar(outputDatabase, sql) <= 0) {
 						Logger.log(LogMessageCategory.INFO,"Truncating empty BaseRateUnits per Advanced Performance Features setting.");

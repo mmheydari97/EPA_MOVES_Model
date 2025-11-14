@@ -1,5 +1,4 @@
 -- MOVES NEI QA Script for Onroad CDBs
--- Last Updated: 2023-08-23 for MOVES4.0.0
 -- ##############################################################################
 -- Usage Notes:  This script is intended to be run via the ANT command 
 --               "onroadNEIQA". See database\NEIQA\NEIQAHelp.pdf for more info.

@@ -38,8 +38,8 @@ CREATE TABLE `MOVESRates` (
   `roadTypeID`     smallint(5) unsigned NOT NULL default '0',
   `emissionQuant`  double               NOT NULL default '0',
   `activity`       double               NOT NULL default '0',
-  `emissionRate`   double               NOT NULL default '0',
-  `units`          varchar(10)             NOT NULL default  '',
+  `emissionRate`   double               NULL,
+  `units`          varchar(10)          NOT NULL default  '',
   PRIMARY KEY (`MOVESRunID`, `iterationID`, `yearID`, `monthID`, `dayID`, `hourID`, `stateID`, `countyID`, `zoneID`, `linkID`, `pollutantID`,
                 `processID`, `sourceTypeID`, `regClassID`, `fuelTypeID`, `modelYearID`, `roadTypeID`)
 ) ENGINE=MyISAM DEFAULT CHARSET='utf8mb4' COLLATE 'utf8mb4_unicode_ci' DELAY_KEY_WRITE=1

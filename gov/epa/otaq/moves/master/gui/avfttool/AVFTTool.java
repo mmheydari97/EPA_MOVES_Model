@@ -179,7 +179,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(createPanel(), BorderLayout.CENTER);
 		pack();
-		setResizable(false);
+		setResizable(true);
         setSize(620, 710);
         findAVFTToolScript();
         instantiateManager();
@@ -191,7 +191,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
 		populateMessagesList();
 
 		pack();
-		(new WindowStateHandler(this)).setSizePositionAndStartTracking(620,710);
+        setSize(620, 710);
 		setModal(true);
 		setVisible(true);
 	}
@@ -503,20 +503,16 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
 
 		// ------------ arrange controls ------------
         panel.setLayout(new GridBagLayout());
-        ((GridBagLayout)panel.getLayout()).columnWidths = new int[] {106, 0, 0, 0, 0, 0};
-        ((GridBagLayout)panel.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        ((GridBagLayout)panel.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4, 0.0, 0.0 };
-        ((GridBagLayout)panel.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4, 0.0};
 
         // inputs inset
         {
             JPanel inputsInset = new JPanel();
             inputsInset.setBorder(BorderFactory.createTitledBorder("Tool Input Selections"));
             inputsInset.setLayout(new GridBagLayout());
-            ((GridBagLayout)inputsInset.getLayout()).columnWidths = new int[] {106, 0, 0, 0, 0, 0};
-            ((GridBagLayout)inputsInset.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-            ((GridBagLayout)inputsInset.getLayout()).columnWeights = new double[] {0.0, 0.0, 1.0E-4, 0.0, 0.0, 0.0 };
-            ((GridBagLayout)inputsInset.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4, 0.0};
+            ((GridBagLayout)inputsInset.getLayout()).columnWidths = new int[] {106, 16, 0, 0, 0, 0};
+            ((GridBagLayout)inputsInset.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            ((GridBagLayout)inputsInset.getLayout()).columnWeights = new double[] {2, 0, 1, 1, 1};
+            ((GridBagLayout)inputsInset.getLayout()).rowWeights = new double[] {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
             int r = 0; // track current row
             int cCheck = 1;
             int cGapFilling = 2;
@@ -531,32 +527,35 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel lcmyLabel = new JLabel("Last complete model year in input data:");
             lcmyLabel.setDisplayedMnemonic('y');
             lcmyLabel.setLabelFor(lastCompleteMYCombo);
-            inputsInset.add(lcmyLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
+            ToolTipHelper.add(lcmyLabel, "Last complete model year in input data");
+            inputsInset.add(lcmyLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.1, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 0), 0, 0));
-            inputsInset.add(lastCompleteMYCombo, new GridBagConstraints(cCheck, r, 2, 1, 0.0, 0.0,
+            inputsInset.add(lastCompleteMYCombo, new GridBagConstraints(cCheck, r, 2, 1, 0.0, 0.1,
                 GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 4, 1, 0), 0, 0));
                 
             r++;
             JLabel analysisYearLabel = new JLabel("Analysis year:");
             analysisYearLabel.setDisplayedMnemonic('s');
             analysisYearLabel.setLabelFor(analysisYearCombo);
-            inputsInset.add(analysisYearLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
+            ToolTipHelper.add(analysisYearLabel, "Analysis year");
+            inputsInset.add(analysisYearLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.1, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 0), 0, 0));
-            inputsInset.add(analysisYearCombo, new GridBagConstraints(cCheck, r, 2, 1, 0.0, 0.0,
+            inputsInset.add(analysisYearCombo, new GridBagConstraints(cCheck, r, 2, 1, 0.0, 0.1,
                 GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 4, 1, 0), 0, 0));
 
             r++;
             inputsInset.add(allEnableCheck, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 1, 5), 0, 0));
-            inputsInset.add(new JLabel("Gap-filling Method:"), new GridBagConstraints(cGapFilling, r, 2, 1, 0.0, 0.0, 
+            inputsInset.add(new JLabel("Gap-filling Method"), new GridBagConstraints(cGapFilling, r, 2, 1, 0.0, 0.0, 
                 GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 1, 5), 0, 0));
-            inputsInset.add(new JLabel("Projection Method:"), new GridBagConstraints(cProjection, r, 2, 1, 0.0, 0.0, 
+            inputsInset.add(new JLabel("Projection Method"), new GridBagConstraints(cProjection, r, 2, 1, 0.0, 0.0, 
                 GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(2, 0, 1, 5), 0, 0));
 
             r++;
             JLabel mcLabel = new JLabel("Motorcycles (11):");
             mcLabel.setDisplayedMnemonic('1');
             mcLabel.setLabelFor(enable11Check);
+            ToolTipHelper.add(mcLabel, "Motorcycles (11)");
             inputsInset.add(mcLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable11Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -570,6 +569,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel pcLabel = new JLabel("Passenger Cars (21):");
             pcLabel.setDisplayedMnemonic('P');
             pcLabel.setLabelFor(enable21Check);
+            ToolTipHelper.add(pcLabel, "Passenger Cars (21)");
             inputsInset.add(pcLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable21Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -583,6 +583,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel ptLabel = new JLabel("Passenger Trucks (31):");
             ptLabel.setDisplayedMnemonic('a');
             ptLabel.setLabelFor(enable31Check);
+            ToolTipHelper.add(ptLabel, "Passenger Trucks (31)");
             inputsInset.add(ptLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable31Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -596,6 +597,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel ldcLabel = new JLabel("LD Commercial Trucks (32):");
             ldcLabel.setDisplayedMnemonic('L');
             ldcLabel.setLabelFor(enable32Check);
+            ToolTipHelper.add(ldcLabel, "LD Commercial Trucks (32)");
             inputsInset.add(ldcLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable32Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -609,6 +611,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel otherLabel = new JLabel("Other Buses (41):");
             otherLabel.setDisplayedMnemonic('B');
             otherLabel.setLabelFor(enable41Check);
+            ToolTipHelper.add(otherLabel, "Other Buses (41)");
             inputsInset.add(otherLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable41Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -623,6 +626,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel transitLabel = new JLabel("Transit Buses (42):");
             transitLabel.setDisplayedMnemonic('T');
             transitLabel.setLabelFor(enable42Check);
+            ToolTipHelper.add(transitLabel, "Transit Buses (42)");
             inputsInset.add(transitLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable42Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -636,6 +640,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel schoolLabel = new JLabel("School Buses (43):");
             schoolLabel.setDisplayedMnemonic('u');
             schoolLabel.setLabelFor(enable43Check);
+            ToolTipHelper.add(schoolLabel, "School Buses (43)");
             inputsInset.add(schoolLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable43Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -650,6 +655,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel refuseLabel = new JLabel("Refuse Trucks (51):");
             refuseLabel.setDisplayedMnemonic('f');
             refuseLabel.setLabelFor(enable51Check);
+            ToolTipHelper.add(refuseLabel, "Refuse Trucks (51)");
             inputsInset.add(refuseLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable51Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -664,6 +670,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel sushLabel = new JLabel("Single Unit Short-haul (52):");
             sushLabel.setDisplayedMnemonic('5');
             sushLabel.setLabelFor(enable52Check);
+            ToolTipHelper.add(sushLabel, "Single Unit Short-haul (52)");
             inputsInset.add(sushLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable52Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -677,6 +684,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel sulhLabel = new JLabel("Single Unit Long-haul (53):");
             sulhLabel.setDisplayedMnemonic('e');
             sulhLabel.setLabelFor(enable53Check);
+            ToolTipHelper.add(sulhLabel, "Single Unit Long-haul (53)");
             inputsInset.add(sulhLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable53Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -691,6 +699,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel rvLabel = new JLabel("Motor Homes (54):");
             rvLabel.setDisplayedMnemonic('M');
             rvLabel.setLabelFor(enable54Check);
+            ToolTipHelper.add(rvLabel, "Motor Homes (54)");
             inputsInset.add(rvLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable54Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -705,6 +714,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel cshLabel = new JLabel("Combination Short-haul (61):");
             cshLabel.setDisplayedMnemonic('C');
             cshLabel.setLabelFor(enable61Check);
+            ToolTipHelper.add(cshLabel, "Combination Short-haul (61)");
             inputsInset.add(cshLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable61Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -718,6 +728,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JLabel clhLabel = new JLabel("Combination Long-haul (62):");
             clhLabel.setDisplayedMnemonic('g');
             clhLabel.setLabelFor(enable62Check);
+            ToolTipHelper.add(clhLabel, "Combination Long-haul (62)");
             inputsInset.add(clhLabel, new GridBagConstraints(0, r, 1, 1, 0.0, 0.0, 
                 GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));
             inputsInset.add(enable62Check, new GridBagConstraints(cCheck, r, 1, 1, 0.0, 0.0,
@@ -727,7 +738,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             inputsInset.add(projectionMethod62Combo, new GridBagConstraints(cProjection, r, 2, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 1, 5), 0, 0));                       
 
-            panel.add(inputsInset, new GridBagConstraints(0, 0, 5, 3, 0.0, 0.0,
+            panel.add(inputsInset, new GridBagConstraints(0, 0, 5, 3, 1, 5,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 2, 0), 0, 0));
         }
 
@@ -739,9 +750,9 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             filesInset.setBorder(BorderFactory.createTitledBorder("Input/Output Files"));
             filesInset.setLayout(new GridBagLayout());
             ((GridBagLayout)filesInset.getLayout()).columnWidths = new int[] {120, 246, 75, 75};
-            ((GridBagLayout)filesInset.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-            ((GridBagLayout)filesInset.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0};
-            ((GridBagLayout)filesInset.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4, 0.0};
+            ((GridBagLayout)filesInset.getLayout()).rowHeights = new int[] {0, 0, 0};
+            ((GridBagLayout)filesInset.getLayout()).columnWeights = new double[] {1, 1, 1, 1};
+            ((GridBagLayout)filesInset.getLayout()).rowWeights = new double[] {1, 1, 1};
 
             JLabel inputAVFTLabel = new JLabel("Input AVFT File:");
             inputAVFTLabel.setDisplayedMnemonic('I');
@@ -808,7 +819,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 0, 1, 0), 0, 0));
 
-            panel.add(filesInset, new GridBagConstraints(0, 3, 5, 2, 0.0, 0.0,
+            panel.add(filesInset, new GridBagConstraints(0, 3, 5, 2, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 0, 2, 0), 0, 0));
         }
@@ -818,21 +829,21 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             JPanel messagesInset = new JPanel();
             messagesInset.setBorder(BorderFactory.createTitledBorder("Messages"));
             messagesInset.setLayout(new GridBagLayout());
-            ((GridBagLayout)messagesInset.getLayout()).columnWidths = new int[] {106, 0, 0, 0, 0, 0};
-            ((GridBagLayout)messagesInset.getLayout()).rowHeights = new int[] {72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-            ((GridBagLayout)messagesInset.getLayout()).columnWeights = new double[] {0.0, 0.0, 1.0E-4, 0.0, 0.0, 0.0 };
-            ((GridBagLayout)messagesInset.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4, 0.0};
+            ((GridBagLayout)messagesInset.getLayout()).columnWidths = new int[] {106, 0, 0, 0, 0};
+            ((GridBagLayout)messagesInset.getLayout()).rowHeights = new int[] {30, 0};
+            ((GridBagLayout)messagesInset.getLayout()).columnWeights = new double[] {1, 1, 1, 1, 1};
+            ((GridBagLayout)messagesInset.getLayout()).rowWeights = new double[] {1, 1};
 
             JScrollPane messagesScrollPane = new JScrollPane();
             ToolTipHelper.add(messagesScrollPane,"Displays messages, warnings, and errors");
             messagesScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             messagesScrollPane.setViewportView(messagesList);
 
-            messagesInset.add(messagesScrollPane, new GridBagConstraints(0, 0, 5, 2, 0.0, 0.0,
+            messagesInset.add(messagesScrollPane, new GridBagConstraints(0, 0, 5, 2, 1, 3,
             GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH,
             new Insets(0, 0, 0, 5), 0, 0));
 
-            panel.add(messagesInset, new GridBagConstraints(0, 5, 5, 2, 0.0, 0.0,
+            panel.add(messagesInset, new GridBagConstraints(0, 5, 5, 2, 1, 3,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 new Insets(0, 0, 2, 0), 0, 0));
         }
@@ -843,8 +854,8 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
             buttonInset.setLayout(new GridBagLayout());
             ((GridBagLayout)buttonInset.getLayout()).columnWidths = new int[] {0, 0, 0, 0, 0, 0};
             ((GridBagLayout)buttonInset.getLayout()).rowHeights = new int[] {30};
-            ((GridBagLayout)buttonInset.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1e-4, 0.0};
-            ((GridBagLayout)buttonInset.getLayout()).rowWeights = new double[] {0.0};
+            ((GridBagLayout)buttonInset.getLayout()).columnWeights = new double[] {1, 1, 1, 1, 1, 1};
+            ((GridBagLayout)buttonInset.getLayout()).rowWeights = new double[] {1};
             int c = 0;
 
             runAVFTToolButton.setText("Run AVFT Tool");
@@ -888,7 +899,7 @@ public class AVFTTool extends JDialog implements ActionListener, FocusListener {
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 new Insets(0, 2, 2, 2), 0, 0));
 
-            panel.add(buttonInset, new GridBagConstraints(0, 8, 5, 1, 0.0, 0.0,
+            panel.add(buttonInset, new GridBagConstraints(0, 8, 5, 1, 1, 1,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 new Insets(0, 2, 2, 2), 0, 0));
         }

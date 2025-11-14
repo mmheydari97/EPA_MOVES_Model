@@ -281,7 +281,7 @@ begin
 		insert into auditlog VALUES (NOW(), 'Converter', 'transferred county table', '');
 	end if;
 
-	-- dayvmtfraction: no schema changes, but we removed the requirement for roadTypeID 1 rows in this table, so do not include those when transfering data
+	-- dayvmtfraction: no schema changes, but we removed the requirement for roadTypeID 1 rows in this table, so do not include those when transferring data
     if (dayvmtfractionTableRows >= 0) then
 		create table dayvmtfraction like ##defaultdb##.dayvmtfraction;
         insert ignore into dayvmtfraction select * from ##inputdb##.dayvmtfraction WHERE roadTypeID <> 1;
@@ -376,7 +376,7 @@ begin
 		insert into auditlog VALUES (NOW(), 'Converter', 'transferred hotellingmonthadjust table', '');
 	end if;
 	
-	-- hourvmtfraction: no schema changes, but we removed the requirement for roadTypeID 1 rows in this table, so do not include those when transfering data
+	-- hourvmtfraction: no schema changes, but we removed the requirement for roadTypeID 1 rows in this table, so do not include those when transferring data
     if (hourvmtfractionTableRows >= 0) then
 		create table hourvmtfraction like ##defaultdb##.hourvmtfraction;
         insert ignore into hourvmtfraction select * from ##inputdb##.hourvmtfraction WHERE roadTypeID <> 1;
@@ -535,7 +535,7 @@ begin
         call DBConverter_agedisthelper();
 	    insert into convertTempMessages VALUES ('SourceTypeAgeDistribution values transferred. Age fractions for 30-40 estimated based on the provided'),
                                                ('     fractions for age 30. Note that the MOVES5 default age distributions for long-haul source types (53 and 62)'),
-                                               ('     were used instead transfering over the data from the source database.');
+                                               ('     were used instead transferring over the data from the source database.');
 		insert into auditlog VALUES (NOW(), 'Converter', 'transferred SourceTypeAgeDistribution table', 'See converter help for more information regarding this table');
 	end if;
     

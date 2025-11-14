@@ -10,7 +10,6 @@ import (
 	"math"
 	"os"
 	"sync"
-	"sync/atomic"
 
 	"calc/configuration"
 	"calc/globalevents"
@@ -212,14 +211,8 @@ var uniqueFuelBlocks map[mwo.MWOKey]*mwo.FuelBlock
 // Multithread guard for UniqueFuelBlocks
 var uniqueFuelBlocksGuard = &sync.Mutex{}
 
-// Channel of flags indicating no more fuel blocks are awaiting processing.
-var fuelBlocksDone chan int
-
-// Number of fuel blocks awaiting processing.
-var fuelBlockCount int32
-
-// Number of outstanding fuel block readers
-var fuelBlockReaderCount int32
+// Wait group to ensure all fuel blocks are processed
+var fuelBlockWaitGroup *sync.WaitGroup
 
 // universalActivity key
 type universalActivityKey struct {
@@ -265,9 +258,7 @@ func init() {
 	EmissionRateAdjustment = make(map[EmissionRateAdjustmentKey]float64)
 	EVEfficiency = make(map[EVEfficiencyKey]*EVEfficiencyDetail)
 	uniqueFuelBlocks = make(map[mwo.MWOKey]*mwo.FuelBlock)
-	fuelBlocksDone = make(chan int, 100)
-	fuelBlockCount = 0
-	fuelBlockReaderCount = 0
+	fuelBlockWaitGroup = &sync.WaitGroup{}
 	universalActivity = make(map[universalActivityKey]float64)
 	universalActivityHourDayIDs = make(map[int]bool)
 	activityWeight = make(map[activityWeightKey]*activityWeightDetail)
@@ -320,8 +311,8 @@ func StartSetup() {
 			apuEmissionRateFraction[k] = hourFractionAdjust
 		})
 	}
-	if _, err := os.Stat("ShorepowerEmissionRateFraction"); err == nil {
-		parse.ReadAndParseFile("ShorepowerEmissionRateFraction", func(parts []string) {
+	if _, err := os.Stat("shorepoweremissionratefraction"); err == nil {
+		parse.ReadAndParseFile("shorepoweremissionratefraction", func(parts []string) {
 			// modelYearID fuelTypeID hourFractionAdjust
 			if len(parts) < 3 {
 				return
@@ -783,17 +774,10 @@ func doCalculationPipeline(internalQueueBeforeAccumulator, internalQueueAfterAcc
 
 	// Handle age-based rates
 	fmt.Println("baseratecalculator Reading age-based rates...")
-	fuelBlockReaderCount = 1
 	globalevents.SetReadingStartedJustRates()
-	streamBaseRateByAge(internalQueueBeforeAccumulator)
-	fuelBlockReaderCount = 0
-	// Wait for all fuel blocks to be accumulated
-	for {
-		if fuelBlockCount <= 0 {
-			break
-		}
-		<-fuelBlocksDone // Wait for an event
-	}
+	streamBaseRateByAge(internalQueueBeforeAccumulator) // increments fuelBlockWaitGroup for each row read
+	// Wait for all fuel blocks to be processed by calculateAndAccumulate, which decrements fuelBlockWaitGroup
+	fuelBlockWaitGroup.Wait()
 	// Disburse the accumulated blocks
 	fmt.Println("baseratecalculator Disbursing accumulated age-based blocks...")
 	fmt.Println("baseratecalculator len(uniqueFuelBlocks)=", len(uniqueFuelBlocks))
@@ -801,17 +785,10 @@ func doCalculationPipeline(internalQueueBeforeAccumulator, internalQueueAfterAcc
 
 	// Handle non-age-based rates
 	fmt.Println("baseratecalculator Reading non-age-based rates...")
-	fuelBlockReaderCount = 1
 	globalevents.SetReadingStartedJustRates()
-	streamBaseRate(internalQueueBeforeAccumulator)
-	fuelBlockReaderCount = 0
-	// Wait for all fuel blocks to be accumulated
-	for {
-		if fuelBlockCount <= 0 {
-			break
-		}
-		<-fuelBlocksDone // Wait for an event
-	}
+	streamBaseRate(internalQueueBeforeAccumulator) // increments fuelBlockWaitGroup for each row read
+	// Wait for all fuel blocks to be processed by calculateAndAccumulate, which decrements fuelBlockWaitGroup
+	fuelBlockWaitGroup.Wait()
 	// Disburse the accumulated blocks
 	fmt.Println("baseratecalculator Disbursing accumulated non-age-based blocks...")
 	fmt.Println("baseratecalculator len(uniqueFuelBlocks)=", len(uniqueFuelBlocks))
@@ -843,7 +820,7 @@ func streamBaseRateByAge(outputBlocks chan *mwo.MWOBlock) {
 		recordCount++
 		b := mwo.New() // get a blank mwoBlock
 		fb := b.Add()
-		atomic.AddInt32(&fuelBlockCount, 1)
+		fuelBlockWaitGroup.Add(1)
 		fb.SetupForBaseRates()
 		fb.Key.StateID = mwo.Constants.StateID
 		fb.Key.CountyID = mwo.Constants.CountyID
@@ -925,7 +902,7 @@ func streamBaseRate(outputBlocks chan *mwo.MWOBlock) {
 		recordCount++
 		b := mwo.New() // get a blank mwoBlock
 		fb := b.Add()
-		atomic.AddInt32(&fuelBlockCount, 1)
+		fuelBlockWaitGroup.Add(1)
 		fb.SetupForBaseRates()
 		fb.Key.StateID = mwo.Constants.StateID
 		fb.Key.CountyID = mwo.Constants.CountyID
@@ -1352,11 +1329,8 @@ func calculateAndAccumulate(inputBlocks chan *mwo.MWOBlock) {
 		globalevents.MWOBlockDone()
 		recordCount++
 
-		// Decrement the fuel blocks count status and queue any notices of work being done
-		atomic.AddInt32(&fuelBlockCount, -1)
-		if fuelBlockCount <= 0 && fuelBlockReaderCount <= 0 {
-			fuelBlocksDone <- 1
-		}
+		// Decrement the fuel blocks wait group to indicate we have processed this block
+		fuelBlockWaitGroup.Done()
 	}
 	fmt.Println("baseratecalculator.calculateAndAccumulate done, recordCount=", recordCount)
 }

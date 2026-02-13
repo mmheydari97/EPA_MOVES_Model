@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.5
+    container_name: moves-db
+    environment:
+      MARIADB_ROOT_PASSWORD: moves
+      # MARIADB_DATABASE: movesdb20241112 (This is handled by init script)
+      # MARIADB_USER: moves (Handled by init script)
+      # MARIADB_PASSWORD: moves
+    volumes:
+      - moves_db_data:/var/lib/mysql
+      # Mount the initialization scripts and the large database zip
+      - ./database/Setup:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: moves-app
+    image: moves-model:latest
+    depends_on:
+      - db
+    ports:
+      - "5800:5800" # Web GUI
+      - "5900:5900" # VNC
+    environment:
+      - APP_NAME=EPA MOVES Model
+      - KEEP_APP_RUNNING=1
+      # Initial large window size
+      - DISPLAY_WIDTH=1600
+      - DISPLAY_HEIGHT=1000
+    volumes:
+      # Persist moves logs? 
+      - ./moves_logs:/app/moveslog
+      # If you want to persist sharedwork or other output folders
+      - ./sharedwork:/app/sharedwork
+    links:
+      - db
+
+volumes:
+  moves_db_data:

@@ -1,11 +1,10 @@
 # Build Stage
-FROM debian:11 AS builder
+FROM golang:1.21-bullseye AS builder
 
 # Install dependencies for building
 RUN apt-get update && apt-get install -y \
     openjdk-11-jdk \
     ant \
-    golang \
     git \
     && rm -rf /var/lib/apt/lists/*
 
@@ -62,7 +61,8 @@ RUN chmod +x /startapp.sh
 # Make sure scripts are executable
 RUN chmod +x *.sh \
     && chmod +x calc/externalcalculatorgo \
-    && chmod +x generators/externalgenerator
+    && chmod +x generators/externalgenerator \
+    && chmod -R 777 /app
 
 # Set environment variables
 ENV APP_NAME="EPA MOVES Model"

@@ -132,6 +132,23 @@ cd /d %RunSpecDir%
 
 Once these MOVES runs finish, the workers will remain active until the user closes the command window that they are running in. Note that when the `run` command is executed, MOVES checks to see if any workers are running. It if doesn't find any, it will automatically start one worker to process its bundles. In the example above, the three workers are started before launching MOVES, so the `run` command will not start an additional worker.
 
+
+#### Why multiple workers may appear to run one-at-a-time
+
+If you start `3workers` and only one worker seems busy at a time, this is usually expected behavior and not a failed worker launch:
+
+- **Workers are parallel, but work arrival is not always parallel.** Workers claim `TODO` bundle files by renaming them to `IN_PROGRESS` in the shared work folder. If only one `TODO` file exists at a given moment, only one worker can run while the others wait.
+- **`call ant run ...` lines are sequential.** In a batch file, each `call ant run` starts after the previous run finishes, so RunSpecs themselves are not concurrent unless you launch separate `run` commands in separate terminals.
+- **Database contention can reduce scaling.** MOVES warns that adding workers has diminishing returns because workers compete for database access; on some runspecs this can look like workers taking turns.
+
+To tell whether this is a resource bottleneck versus queue depth behavior, monitor during a run:
+
+1. `sharedwork` folder file counts (`*_TODO`, `*_IN_PROGRESS`, `*_DONE`).
+2. CPU utilization per Java worker process.
+3. MariaDB/MySQL activity (disk busy time, row lock waits, and query throughput).
+
+If `TODO` rarely exceeds 1, the run does not have enough concurrent bundles to keep 3 workers busy. If `TODO` is often >1 but only one worker gets CPU while DB is saturated, the limit is likely machine/database resources.
+
 ## Batch mode input database creation
 MOVES includes an Ant command to create input databases, which can save time if you need to create many input databases at once. The following steps assume that you already have all of your input data files quality checked and ready to go.
 

@@ -294,31 +294,40 @@ public class RemoteEmissionsCalculator extends MOVESThread {
 			}
 			advanceShutdownTimeout();
 		} else {
+			// No TODO files were found, so check for InProgress files.
+			boolean hasInProgressFiles = false;
+			FilenameFilter inProgressFilter = DistributedWorkFileName.buildFileNameFilter
+					("*", "*", null, DistributedWorkFileState.IN_PROGRESS, "*");
+
+			File[] inProgressFiles = WorkerConfiguration.theWorkerConfiguration.
+					sharedDistributedFolderPath.listFiles(inProgressFilter);
+
+			if(inProgressFiles != null && inProgressFiles.length > 0) {
+				hasInProgressFiles = true;
+			}
+
 			if(isAutoShutdownMode) {
 				if(whenToShutdownMillis == 0) {
 					advanceShutdownTimeout();
-				} else {
-					// No TODO files were found, so check for InProgress files.
-					FilenameFilter inProgressFilter = DistributedWorkFileName.buildFileNameFilter
-						("*", "*", null, DistributedWorkFileState.IN_PROGRESS, "*");
-
-					File[] inProgressFiles = WorkerConfiguration.theWorkerConfiguration.
-							sharedDistributedFolderPath.listFiles(inProgressFilter);
-
-					if(inProgressFiles != null && inProgressFiles.length > 0) {
-						// InProgress data was found, even though no TODO files were, so advance
-						// the timeout.  If the worker(s) doing the InProgress work fail, they
-						// will revert back to TODO files and some other worker needs to pick
-						// up the job.
-						advanceShutdownTimeout();
-					}
+				} else if(hasInProgressFiles) {
+					// InProgress data was found, even though no TODO files were, so advance
+					// the timeout.  If the worker(s) doing the InProgress work fail, they
+					// will revert back to TODO files and some other worker needs to pick
+					// up the job.
+					advanceShutdownTimeout();
 				}
 			}
 			try {
-				// Sleep 3-8 seconds before trying again when there are no
-				// files found in the queue.
-				// Randomization is used to reduce contention between workers.
-				Thread.sleep(1000*(3+random.nextInt(6))); // nextInt(6) returns 0-5 inclusive
+				if(hasInProgressFiles) {
+					// Keep polling quickly while peer workers are active. This helps reduce
+					// idle handoff gaps between bundles when TODO files are produced in bursts.
+					Thread.sleep(250+random.nextInt(501)); // 250-750ms
+				} else {
+					// Sleep 3-8 seconds before trying again when there are no
+					// files found in the queue.
+					// Randomization is used to reduce contention between workers.
+					Thread.sleep(1000*(3+random.nextInt(6))); // nextInt(6) returns 0-5 inclusive
+				}
 			} catch (Exception e) {
 				// Nothing to do here.
 			}
